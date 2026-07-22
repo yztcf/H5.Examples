@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/global.css">
+    <title>衣柜自定义布局</title>
+    <style>
+        :root {
+            --toolbar-h: 100px;
+            --bg: #f0f2f5;
+            --panel-bg: #fff;
+            --border: #d0d5dd;
+            --text: #1d2939;
+            --text-secondary: #667085;
+            --primary: #4f7cff;
+            --danger: #f04438;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        /* ---- 工具栏 ---- */
+        .toolbar {
+            height: var(--toolbar-h);
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 20px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .toolbar .title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-right: 8px;
+            white-space: nowrap;
+        }
+        .tool-btn {
+            width: 80px;
+            height: 68px;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            background: #fafbfc;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            flex-shrink: 0;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .tool-btn:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 124, 255, 0.12);
+        }
+        .tool-btn .preview-icon {
+            width: 40px;
+            height: 28px;
+            border-radius: 3px;
+            position: relative;
+        }
+        .tool-btn .preview-icon.space {
+            background: #e8edf5;
+            border: 1px solid #c8d2e0;
+        }
+        .tool-btn .preview-icon.cabinet {
+            background: #e8edf5;
+            border: 2px solid #4f7cff;
+        }
+        .tool-btn .preview-icon.hanging {
+            background: #e8edf5;
+            border: 1px solid #c8d2e0;
+        }
+        .tool-btn .preview-icon.hanging::after {
+            content: '';
+            position: absolute;
+            left: 4px; right: 4px; top: 50%;
+            height: 2px;
+            background: #4f7cff;
+            transform: translateY(-50%);
+        }
+        .tool-btn .preview-icon.drawer {
+            background: #e8edf5;
+            border: 2px solid #4f7cff;
+            width: 44px;
+            height: 24px;
+        }
+        .tool-btn .btn-label {
+            font-size: 11px;
+            color: var(--text);
+            text-align: center;
+            line-height: 1.2;
+            max-width: 72px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .tool-divider {
+            width: 1px;
+            height: 36px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+        .tool-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .action-btn {
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            color: var(--text);
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .action-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .action-btn.danger { color: var(--danger); border-color: var(--danger); }
+        .action-btn.danger:hover { background: #fef3f2; }
+
+        /* ---- 画布 ---- */
+        .canvas-wrap {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            background:
+                linear-gradient(45deg, #f5f5f5 25%, transparent 25%),
+                linear-gradient(-45deg, #f5f5f5 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f5f5f5 75%),
+                linear-gradient(-45deg, transparent 75%, #f5f5f5 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        canvas { display: block; }
+
+        /* ---- 弹窗 ---- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+        }
+        .modal h3 { margin: 0 0 16px; font-size: 16px; color: var(--text); }
+        .modal .form-group { margin-bottom: 12px; }
+        .modal .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .modal .form-group input[type="checkbox"] {
+            width: 16px; height: 16px;
+            accent-color: var(--primary);
+        }
+        .modal .form-group input[type="number"] {
+            width: 80px;
+            padding: 6px 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+        .modal .form-group input[type="number"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(79, 124, 255, 0.15);
+        }
+        .modal .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .modal .modal-actions button {
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
+            transition: all 0.15s;
+        }
+        .modal .modal-actions button.primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .modal .modal-actions button.primary:hover { opacity: 0.9; }
+        .modal .modal-actions button:hover { border-color: var(--primary); }
+
+        /* ---- 重命名输入框 ---- */
+        .rename-input {
+            position: fixed;
+            z-index: 200;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 13px;
+            outline: none;
+            background: #fff;
+            text-align: center;
+            font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ---- 右键菜单 ---- */
+        .context-menu {
+            display: none;
+            position: fixed;
+            z-index: 250;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+            padding: 4px 0;
+            min-width: 140px;
+            overflow: hidden;
+        }
+        .context-menu.active { display: block; }
+        .context-menu .menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            color: var(--text);
+            cursor: pointer;
+            transition: background 0.1s;
+            white-space: nowrap;
+        }
+        .context-menu .menu-item:hover { background: #f0f4ff; color: var(--primary); }
+        .context-menu .menu-item.danger { color: var(--danger); }
+        .context-menu .menu-item.danger:hover { background: #fef3f2; }
+        .context-menu .menu-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+        .context-menu .menu-item.disabled {
+            color: #ccc;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <span class="title">组件</span>
+
+        <div class="tool-btn" id="btnSpace" title="点击添加到画布 | 双击文字重命名">
+            <div class="preview-icon space"></div>
+            <span class="btn-label" data-default="空间">空间1</span>
+        </div>
+
+        <div class="tool-btn" id="btnCabinet" title="点击设置边框属性后添加 | 双击文字重命名">
+            <div class="preview-icon cabinet"></div>
+            <span class="btn-label" data-default="柜子">柜子1</span>
+        </div>
+
+        <div class="tool-btn" id="btnHanging" title="点击设置横杠位置后添加 | 双击文字重命名">
+            <div class="preview-icon hanging"></div>
+            <span class="btn-label" data-default="挂衣区">挂衣区1</span>
+        </div>
+
+        <div class="tool-btn" id="btnDrawer" title="点击添加到画布 | 双击文字重命名">
+            <div class="preview-icon drawer"></div>
+            <span class="btn-label" data-default="抽屉">抽屉1</span>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <div class="tool-actions">
+            <button class="action-btn danger" id="btnDelete" title="删除选中盒子 (Delete)">删除</button>
+        </div>
+    </div>
+
+    <!-- 画布 -->
+    <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="mainCanvas"></canvas>
+    </div>
+
+    <!-- 柜子弹窗 -->
+    <div class="modal-overlay" id="cabinetModal">
+        <div class="modal">
+            <h3>柜子边框设置</h3>
+            <div class="form-group"><label><input type="checkbox" id="cbTop" checked> 上边框</label></div>
+            <div class="form-group"><label><input type="checkbox" id="cbBottom" checked> 下边框</label></div>
+            <div class="form-group"><label><input type="checkbox" id="cbLeft" checked> 左边框</label></div>
+            <div class="form-group"><label><input type="checkbox" id="cbRight" checked> 右边框</label></div>
+            <div class="modal-actions">
+                <button id="cabinetCancel">取消</button>
+                <button class="primary" id="cabinetOk">确定添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 挂衣区弹窗 -->
+    <div class="modal-overlay" id="hangingModal">
+        <div class="modal">
+            <h3>挂衣区横杠设置</h3>
+            <div class="form-group">
+                <label>横杠距离顶部: <input type="number" id="hangingDist" value="30" min="5" max="200"> px</label>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">横杠宽度跟随X轴缩放，不跟随Y轴</div>
+            <div class="modal-actions">
+                <button id="hangingCancel">取消</button>
+                <button class="primary" id="hangingOk">确定添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重命名输入框 -->
+    <input type="text" class="rename-input" id="renameInput" style="display:none;" maxlength="20" />
+
+    <!-- 右键菜单 -->
+    <div class="context-menu" id="contextMenu">
+        <div class="menu-item" data-action="bringToFront">置于顶部</div>
+        <div class="menu-item" data-action="sendToBack">置于底部</div>
+        <div class="menu-divider"></div>
+        <div class="menu-item" data-action="copy">复制</div>
+        <div class="menu-item" data-action="paste">粘贴</div>
+        <div class="menu-divider"></div>
+        <div class="menu-item danger" data-action="delete">删除</div>
+    </div>
+
+    <script>
+        (function () {
+            // ==================== DOM 引用 ====================
+            const canvasWrap = document.getElementById('canvasWrap');
+            const canvas = document.getElementById('mainCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const btnSpace = document.getElementById('btnSpace');
+            const btnCabinet = document.getElementById('btnCabinet');
+            const btnHanging = document.getElementById('btnHanging');
+            const btnDrawer = document.getElementById('btnDrawer');
+            const btnDelete = document.getElementById('btnDelete');
+
+            const cabinetModal = document.getElementById('cabinetModal');
+            const hangingModal = document.getElementById('hangingModal');
+            const renameInput = document.getElementById('renameInput');
+            const contextMenu = document.getElementById('contextMenu');
+
+            // ==================== 状态 ====================
+            const HANDLE_SIZE = 10;
+            const MIN_SIZE = 30;
+            const SNAP_THRESHOLD = 6;
+
+            let boxes = [];
+            let selectedId = null;
+            let clipboard = null;
+            let nextId = 1;
+            const counters = { space: 1, cabinet: 1, hanging: 1, drawer: 1 };
+            let snapLines = [];
+            let dragState = null;
+            let contextMenuTarget = null;
+            let contextMenuPos = null;
+
+            // ==================== 盒子创建 ====================
+            function createBox(type, x, y, w, h, text) {
+                return {
+                    id: nextId++,
+                    type,
+                    x, y, width: w, height: h,
+                    text,
+                    borderTop: true,
+                    borderBottom: true,
+                    borderLeft: true,
+                    borderRight: true,
+                    lineDistanceFromTop: 30,
+                    lineFollowX: true,
+                };
+            }
+
+            function getBoxById(id) { return boxes.find(b => b.id === id); }
+
+            function getToolBtnLabel(type) {
+                const map = { space: btnSpace, cabinet: btnCabinet, hanging: btnHanging, drawer: btnDrawer };
+                return map[type] ? map[type].querySelector('.btn-label') : null;
+            }
+
+            function getDefaultText(type) {
+                const labelEl = getToolBtnLabel(type);
+                const base = labelEl ? labelEl.getAttribute('data-default') : type;
+                return base + counters[type];
+            }
+
+            function incrementCounter(type) {
+                counters[type]++;
+                const labelEl = getToolBtnLabel(type);
+                if (labelEl) labelEl.textContent = labelEl.getAttribute('data-default') + counters[type];
+            }
+
+            // ==================== 画布尺寸 ====================
+            function resizeCanvas() {
+                const rect = canvasWrap.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+
+            // ==================== 渲染 ====================
+            function draw() {
+                const w = canvas.width / (window.devicePixelRatio || 1);
+                const h = canvas.height / (window.devicePixelRatio || 1);
+                ctx.clearRect(0, 0, w, h);
+
+                for (const box of boxes) drawBox(box);
+                drawSnapLines();
+            }
+
+            function drawBox(box) {
+                const { x, y, width, height, type, text } = box;
+
+                // 背景
+                ctx.fillStyle = '#f5f7fb';
+                ctx.fillRect(x, y, width, height);
+
+                // 外框（选中时高亮，默认透明）
+                if (box.id === selectedId) {
+                    ctx.strokeStyle = '#4f7cff';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([]);
+                    ctx.strokeRect(x, y, width, height);
+                }
+
+                // 柜子/抽屉 - 四边蓝框
+                if (type === 'cabinet' || type === 'drawer') {
+                    ctx.strokeStyle = '#4f7cff';
+                    ctx.lineWidth = 2.5;
+                    ctx.setLineDash([]);
+                    if (box.borderTop) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + width, y); ctx.stroke(); }
+                    if (box.borderBottom) { ctx.beginPath(); ctx.moveTo(x, y + height); ctx.lineTo(x + width, y + height); ctx.stroke(); }
+                    if (box.borderLeft) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + height); ctx.stroke(); }
+                    if (box.borderRight) { ctx.beginPath(); ctx.moveTo(x + width, y); ctx.lineTo(x + width, y + height); ctx.stroke(); }
+                }
+
+                // 挂衣区 - 横杠
+                if (type === 'hanging') {
+                    const lineY = y + box.lineDistanceFromTop;
+                    ctx.strokeStyle = '#4f7cff';
+                    ctx.lineWidth = 2.5;
+                    ctx.setLineDash([]);
+                    ctx.beginPath();
+                    ctx.moveTo(x, lineY);
+                    ctx.lineTo(x + width, lineY);
+                    ctx.stroke();
+                }
+
+                // 文字
+                ctx.fillStyle = '#1d2939';
+                ctx.font = '13px "PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, x + width / 2, y + height / 2);
+
+                // 选中时缩放手柄
+                if (box.id === selectedId) drawResizeHandles(box);
+            }
+
+            function drawResizeHandles(box) {
+                const { x, y, width, height } = box;
+                const hs = HANDLE_SIZE;
+                const handles = [
+                    { cx: x, cy: y },
+                    { cx: x + width / 2, cy: y },
+                    { cx: x + width, cy: y },
+                    { cx: x + width, cy: y + height / 2 },
+                    { cx: x + width, cy: y + height },
+                    { cx: x + width / 2, cy: y + height },
+                    { cx: x, cy: y + height },
+                    { cx: x, cy: y + height / 2 },
+                ];
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#4f7cff';
+                ctx.lineWidth = 2;
+                for (const h of handles) {
+                    ctx.fillRect(h.cx - hs / 2, h.cy - hs / 2, hs, hs);
+                    ctx.strokeRect(h.cx - hs / 2, h.cy - hs / 2, hs, hs);
+                }
+            }
+
+            function drawSnapLines() {
+                if (snapLines.length === 0) return;
+                const w = canvas.width / (window.devicePixelRatio || 1);
+                const h = canvas.height / (window.devicePixelRatio || 1);
+                ctx.save();
+                ctx.strokeStyle = '#ff4d4f';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 3]);
+                for (const sl of snapLines) {
+                    ctx.beginPath();
+                    if (sl.type === 'v') { ctx.moveTo(sl.pos, 0); ctx.lineTo(sl.pos, h); }
+                    else { ctx.moveTo(0, sl.pos); ctx.lineTo(w, sl.pos); }
+                    ctx.stroke();
+                }
+                ctx.setLineDash([]);
+                ctx.restore();
+            }
+
+            // ==================== 命中检测 ====================
+            function getHandleAt(mx, my, box) {
+                const { x, y, width, height } = box;
+                const hs = HANDLE_SIZE;
+                const handles = [
+                    { name: 'nw', cx: x, cy: y },
+                    { name: 'n', cx: x + width / 2, cy: y },
+                    { name: 'ne', cx: x + width, cy: y },
+                    { name: 'e', cx: x + width, cy: y + height / 2 },
+                    { name: 'se', cx: x + width, cy: y + height },
+                    { name: 's', cx: x + width / 2, cy: y + height },
+                    { name: 'sw', cx: x, cy: y + height },
+                    { name: 'w', cx: x, cy: y + height / 2 },
+                ];
+                for (const h of handles) {
+                    if (mx >= h.cx - hs / 2 && mx <= h.cx + hs / 2 &&
+                        my >= h.cy - hs / 2 && my <= h.cy + hs / 2) return h.name;
+                }
+                return null;
+            }
+
+            function getBoxAt(mx, my) {
+                for (let i = boxes.length - 1; i >= 0; i--) {
+                    const b = boxes[i];
+                    if (mx >= b.x && mx <= b.x + b.width && my >= b.y && my <= b.y + b.height) return b;
+                }
+                return null;
+            }
+
+            function getCursorForHandle(handle) {
+                const map = {
+                    nw: 'nwse-resize', n: 'ns-resize', ne: 'nesw-resize',
+                    e: 'ew-resize', se: 'nwse-resize', s: 'ns-resize',
+                    sw: 'nesw-resize', w: 'ew-resize',
+                };
+                return map[handle] || 'default';
+            }
+
+            // ==================== 鼠标事件 ====================
+            function getCanvasPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                const pos = getCanvasPos(e);
+                const mx = pos.x, my = pos.y;
+
+                if (selectedId !== null) {
+                    const selBox = getBoxById(selectedId);
+                    if (selBox) {
+                        const handle = getHandleAt(mx, my, selBox);
+                        if (handle) {
+                            dragState = { mode: 'resize', boxId: selectedId, handle, startX: mx, startY: my, origBox: { ...selBox } };
+                            return;
+                        }
+                    }
+                }
+
+                const hitBox = getBoxAt(mx, my);
+                if (hitBox) {
+                    selectedId = hitBox.id;
+                    dragState = { mode: 'move', boxId: hitBox.id, startX: mx, startY: my, origBox: { ...hitBox } };
+                    draw();
+                    return;
+                }
+
+                selectedId = null;
+                dragState = null;
+                draw();
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                const pos = getCanvasPos(e);
+                const mx = pos.x, my = pos.y;
+
+                if (dragState) {
+                    const dx = mx - dragState.startX;
+                    const dy = my - dragState.startY;
+                    const box = getBoxById(dragState.boxId);
+                    if (!box) { dragState = null; snapLines = []; return; }
+
+                    if (dragState.mode === 'move') {
+                        box.x = dragState.origBox.x + dx;
+                        box.y = dragState.origBox.y + dy;
+                    } else if (dragState.mode === 'resize') {
+                        applyResize(box, dragState.handle, dx, dy);
+                    }
+                    snapEdges(box, dragState.boxId);
+                    draw();
+                } else {
+                    snapLines = [];
+                    updateCursor(mx, my);
+                }
+            });
+
+            canvas.addEventListener('mouseup', () => { dragState = null; snapLines = []; });
+            canvas.addEventListener('mouseleave', () => { dragState = null; snapLines = []; });
+
+            canvas.addEventListener('dblclick', (e) => {
+                const pos = getCanvasPos(e);
+                const hitBox = getBoxAt(pos.x, pos.y);
+                if (hitBox) startRenameBox(hitBox);
+            });
+
+            function applyResize(box, handle, dx, dy) {
+                const orig = dragState.origBox;
+                let { x, y, width, height } = orig;
+
+                switch (handle) {
+                    case 'nw': x = orig.x + dx; y = orig.y + dy; width = orig.width - dx; height = orig.height - dy; break;
+                    case 'n': y = orig.y + dy; height = orig.height - dy; break;
+                    case 'ne': y = orig.y + dy; width = orig.width + dx; height = orig.height - dy; break;
+                    case 'e': width = orig.width + dx; break;
+                    case 'se': width = orig.width + dx; height = orig.height + dy; break;
+                    case 's': height = orig.height + dy; break;
+                    case 'sw': x = orig.x + dx; width = orig.width - dx; height = orig.height + dy; break;
+                    case 'w': x = orig.x + dx; width = orig.width - dx; break;
+                }
+
+                if (width < MIN_SIZE) {
+                    if (handle.includes('w')) x = orig.x + orig.width - MIN_SIZE;
+                    width = MIN_SIZE;
+                }
+                if (height < MIN_SIZE) {
+                    if (handle.includes('n')) y = orig.y + orig.height - MIN_SIZE;
+                    height = MIN_SIZE;
+                }
+
+                box.x = x; box.y = y; box.width = width; box.height = height;
+            }
+
+            function updateCursor(mx, my) {
+                if (selectedId !== null) {
+                    const selBox = getBoxById(selectedId);
+                    if (selBox) {
+                        const handle = getHandleAt(mx, my, selBox);
+                        if (handle) { canvas.style.cursor = getCursorForHandle(handle); return; }
+                    }
+                }
+                canvas.style.cursor = getBoxAt(mx, my) ? 'move' : 'default';
+            }
+
+            // ==================== 边缘吸附 ====================
+            function snapEdges(box, excludeId) {
+                snapLines = [];
+                const others = boxes.filter(b => b.id !== excludeId);
+                if (others.length === 0) return;
+
+                const boxEdges = {
+                    left: box.x, right: box.x + box.width,
+                    top: box.y, bottom: box.y + box.height,
+                    centerX: box.x + box.width / 2, centerY: box.y + box.height / 2,
+                };
+
+                let snapX = null, snapY = null;
+                let minDx = SNAP_THRESHOLD + 1, minDy = SNAP_THRESHOLD + 1;
+
+                for (const other of others) {
+                    const oe = {
+                        left: other.x, right: other.x + other.width,
+                        top: other.y, bottom: other.y + other.height,
+                        centerX: other.x + other.width / 2, centerY: other.y + other.height / 2,
+                    };
+
+                    const xChecks = [
+                        { b: boxEdges.left, o: oe.left }, { b: boxEdges.right, o: oe.right },
+                        { b: boxEdges.left, o: oe.right }, { b: boxEdges.right, o: oe.left },
+                        { b: boxEdges.centerX, o: oe.centerX },
+                    ];
+                    for (const c of xChecks) {
+                        const d = Math.abs(c.b - c.o);
+                        if (d < minDx) { minDx = d; snapX = c.o - (c.b - box.x); }
+                    }
+
+                    const yChecks = [
+                        { b: boxEdges.top, o: oe.top }, { b: boxEdges.bottom, o: oe.bottom },
+                        { b: boxEdges.top, o: oe.bottom }, { b: boxEdges.bottom, o: oe.top },
+                        { b: boxEdges.centerY, o: oe.centerY },
+                    ];
+                    for (const c of yChecks) {
+                        const d = Math.abs(c.b - c.o);
+                        if (d < minDy) { minDy = d; snapY = c.o - (c.b - box.y); }
+                    }
+                }
+
+                if (minDx <= SNAP_THRESHOLD && snapX !== null) {
+                    box.x = snapX;
+                    for (const other of others) {
+                        if (Math.abs(box.x - other.x) <= SNAP_THRESHOLD) snapLines.push({ type: 'v', pos: box.x });
+                        if (Math.abs(box.x + box.width - other.x - other.width) <= SNAP_THRESHOLD) snapLines.push({ type: 'v', pos: box.x + box.width });
+                        if (Math.abs(box.x + box.width / 2 - other.x - other.width / 2) <= SNAP_THRESHOLD) snapLines.push({ type: 'v', pos: box.x + box.width / 2 });
+                    }
+                    snapLines = snapLines.filter((sl, i, arr) => arr.findIndex(s => s.type === sl.type && Math.abs(s.pos - sl.pos) < 1) === i);
+                }
+
+                if (minDy <= SNAP_THRESHOLD && snapY !== null) {
+                    box.y = snapY;
+                    const existingV = snapLines.filter(s => s.type === 'v');
+                    snapLines = existingV;
+                    for (const other of others) {
+                        if (Math.abs(box.y - other.y) <= SNAP_THRESHOLD) snapLines.push({ type: 'h', pos: box.y });
+                        if (Math.abs(box.y + box.height - other.y - other.height) <= SNAP_THRESHOLD) snapLines.push({ type: 'h', pos: box.y + box.height });
+                        if (Math.abs(box.y + box.height / 2 - other.y - other.height / 2) <= SNAP_THRESHOLD) snapLines.push({ type: 'h', pos: box.y + box.height / 2 });
+                    }
+                    snapLines = snapLines.filter((sl, i, arr) => arr.findIndex(s => s.type === sl.type && Math.abs(s.pos - sl.pos) < 1) === i);
+                }
+            }
+
+            // ==================== 键盘事件 ====================
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'c') {
+                    if (selectedId !== null) {
+                        const box = getBoxById(selectedId);
+                        if (box) {
+                            clipboard = JSON.parse(JSON.stringify(box));
+                            clipboard.id = null;
+                            showToast('已复制');
+                        }
+                    }
+                    e.preventDefault();
+                }
+
+                if (e.ctrlKey && e.key === 'v') {
+                    if (clipboard) {
+                        const newBox = JSON.parse(JSON.stringify(clipboard));
+                        newBox.id = nextId++;
+                        newBox.x += 20; newBox.y += 20;
+                        boxes.push(newBox);
+                        selectedId = newBox.id;
+                        draw();
+                        showToast('已粘贴');
+                    }
+                    e.preventDefault();
+                }
+
+                if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId !== null && document.activeElement === document.body) {
+                    deleteSelected();
+                    e.preventDefault();
+                }
+            });
+
+            function deleteSelected() {
+                if (selectedId === null) return;
+                boxes = boxes.filter(b => b.id !== selectedId);
+                selectedId = null;
+                draw();
+            }
+
+            // ==================== 重命名 ====================
+            function startRenameBox(box) {
+                const rect = canvas.getBoundingClientRect();
+                renameInput.style.display = 'block';
+                renameInput.style.left = (rect.left + box.x + box.width / 2 - 60) + 'px';
+                renameInput.style.top = (rect.top + box.y + box.height / 2 - 14) + 'px';
+                renameInput.style.width = '120px';
+                renameInput.value = box.text;
+                renameInput.focus();
+                renameInput.select();
+                renameInput._boxId = box.id;
+            }
+
+            function startRenameToolBtn(labelEl) {
+                const rect = labelEl.getBoundingClientRect();
+                renameInput.style.display = 'block';
+                renameInput.style.left = rect.left + 'px';
+                renameInput.style.top = rect.top + 'px';
+                renameInput.style.width = rect.width + 'px';
+                renameInput.value = labelEl.textContent.trim();
+                renameInput.focus();
+                renameInput.select();
+                renameInput._toolLabel = labelEl;
+                renameInput._boxId = null;
+            }
+
+            renameInput.addEventListener('blur', finishRename);
+            renameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') finishRename();
+                else if (e.key === 'Escape') { renameInput.value = ''; finishRename(); }
+            });
+
+            function finishRename() {
+                const val = renameInput.value.trim();
+                if (renameInput._boxId && val) {
+                    const box = getBoxById(renameInput._boxId);
+                    if (box) box.text = val;
+                } else if (renameInput._toolLabel && val) {
+                    const base = val.replace(/\d+$/, '');
+                    renameInput._toolLabel.setAttribute('data-default', base);
+                    const type = getTypeFromLabel(renameInput._toolLabel);
+                    if (type) {
+                        const num = parseInt((val.match(/(\d+)$/) || ['0'])[0]) || 0;
+                        counters[type] = num > 0 ? num + 1 : counters[type];
+                        renameInput._toolLabel.textContent = val;
+                    }
+                }
+                renameInput.style.display = 'none';
+                renameInput._boxId = null;
+                renameInput._toolLabel = null;
+                draw();
+            }
+
+            function getTypeFromLabel(labelEl) {
+                if (labelEl.closest('#btnSpace')) return 'space';
+                if (labelEl.closest('#btnCabinet')) return 'cabinet';
+                if (labelEl.closest('#btnHanging')) return 'hanging';
+                if (labelEl.closest('#btnDrawer')) return 'drawer';
+                return null;
+            }
+
+            // ==================== 工具栏按钮 ====================
+            btnSpace.addEventListener('click', () => {
+                const text = getDefaultText('space');
+                const box = createBox('space', 60 + boxes.length * 15, 60 + boxes.length * 15, 150, 120, text);
+                boxes.push(box);
+                selectedId = box.id;
+                incrementCounter('space');
+                draw();
+            });
+            btnSpace.querySelector('.btn-label').addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                startRenameToolBtn(btnSpace.querySelector('.btn-label'));
+            });
+
+            btnCabinet.addEventListener('click', () => {
+                document.getElementById('cbTop').checked = true;
+                document.getElementById('cbBottom').checked = true;
+                document.getElementById('cbLeft').checked = true;
+                document.getElementById('cbRight').checked = true;
+                cabinetModal.classList.add('active');
+            });
+            btnCabinet.querySelector('.btn-label').addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                startRenameToolBtn(btnCabinet.querySelector('.btn-label'));
+            });
+
+            btnHanging.addEventListener('click', () => {
+                document.getElementById('hangingDist').value = 30;
+                hangingModal.classList.add('active');
+            });
+            btnHanging.querySelector('.btn-label').addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                startRenameToolBtn(btnHanging.querySelector('.btn-label'));
+            });
+
+            btnDrawer.addEventListener('click', () => {
+                const text = getDefaultText('drawer');
+                const box = createBox('drawer', 60 + boxes.length * 15, 60 + boxes.length * 15, 180, 80, text);
+                boxes.push(box);
+                selectedId = box.id;
+                incrementCounter('drawer');
+                draw();
+            });
+            btnDrawer.querySelector('.btn-label').addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                startRenameToolBtn(btnDrawer.querySelector('.btn-label'));
+            });
+
+            btnDelete.addEventListener('click', deleteSelected);
+
+            // ==================== 弹窗事件 ====================
+            document.getElementById('cabinetOk').addEventListener('click', () => {
+                const text = getDefaultText('cabinet');
+                const box = createBox('cabinet', 60 + boxes.length * 15, 60 + boxes.length * 15, 150, 120, text);
+                box.borderTop = document.getElementById('cbTop').checked;
+                box.borderBottom = document.getElementById('cbBottom').checked;
+                box.borderLeft = document.getElementById('cbLeft').checked;
+                box.borderRight = document.getElementById('cbRight').checked;
+                boxes.push(box);
+                selectedId = box.id;
+                incrementCounter('cabinet');
+                cabinetModal.classList.remove('active');
+                draw();
+            });
+            document.getElementById('cabinetCancel').addEventListener('click', () => cabinetModal.classList.remove('active'));
+
+            document.getElementById('hangingOk').addEventListener('click', () => {
+                const text = getDefaultText('hanging');
+                const box = createBox('hanging', 60 + boxes.length * 15, 60 + boxes.length * 15, 150, 120, text);
+                box.lineDistanceFromTop = parseInt(document.getElementById('hangingDist').value) || 30;
+                boxes.push(box);
+                selectedId = box.id;
+                incrementCounter('hanging');
+                hangingModal.classList.remove('active');
+                draw();
+            });
+            document.getElementById('hangingCancel').addEventListener('click', () => hangingModal.classList.remove('active'));
+
+            cabinetModal.addEventListener('click', (e) => { if (e.target === cabinetModal) cabinetModal.classList.remove('active'); });
+            hangingModal.addEventListener('click', (e) => { if (e.target === hangingModal) hangingModal.classList.remove('active'); });
+
+            // ==================== Toast ====================
+            function showToast(msg) {
+                let toast = document.getElementById('toast');
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.id = 'toast';
+                    toast.style.cssText = 'position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;z-index:300;pointer-events:none;transition:opacity 0.3s;opacity:0;';
+                    document.body.appendChild(toast);
+                }
+                toast.textContent = msg;
+                toast.style.opacity = '1';
+                clearTimeout(toast._timer);
+                toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 1200);
+            }
+
+            // ==================== 右键菜单 ====================
+            canvas.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                const pos = getCanvasPos(e);
+                contextMenuPos = pos;
+                const hitBox = getBoxAt(pos.x, pos.y);
+                if (hitBox) {
+                    selectedId = hitBox.id;
+                    contextMenuTarget = hitBox.id;
+                } else {
+                    contextMenuTarget = null;
+                }
+                draw();
+                updateContextMenuItems();
+                contextMenu.style.left = e.clientX + 'px';
+                contextMenu.style.top = e.clientY + 'px';
+                contextMenu.classList.add('active');
+            });
+
+            function updateContextMenuItems() {
+                const items = contextMenu.querySelectorAll('.menu-item');
+                items.forEach(item => {
+                    const action = item.getAttribute('data-action');
+                    if (action === 'paste') {
+                        item.classList.toggle('disabled', !clipboard);
+                        return;
+                    }
+                    item.classList.toggle('disabled', !contextMenuTarget);
+                });
+            }
+
+            function hideContextMenu() {
+                contextMenu.classList.remove('active');
+                contextMenuTarget = null;
+            }
+
+            contextMenu.addEventListener('click', (e) => {
+                const menuItem = e.target.closest('.menu-item');
+                if (!menuItem || menuItem.classList.contains('disabled')) return;
+                handleContextAction(menuItem.getAttribute('data-action'));
+                hideContextMenu();
+            });
+
+            function handleContextAction(action) {
+                switch (action) {
+                    case 'bringToFront': {
+                        if (contextMenuTarget === null) return;
+                        const frontIdx = boxes.findIndex(b => b.id === contextMenuTarget);
+                        if (frontIdx >= 0) boxes.push(boxes.splice(frontIdx, 1)[0]);
+                        draw();
+                        break;
+                    }
+                    case 'sendToBack': {
+                        if (contextMenuTarget === null) return;
+                        const backIdx = boxes.findIndex(b => b.id === contextMenuTarget);
+                        if (backIdx >= 0) boxes.unshift(boxes.splice(backIdx, 1)[0]);
+                        draw();
+                        break;
+                    }
+                    case 'copy': {
+                        if (contextMenuTarget === null) return;
+                        const box = getBoxById(contextMenuTarget);
+                        if (box) { clipboard = JSON.parse(JSON.stringify(box)); clipboard.id = null; showToast('已复制'); }
+                        break;
+                    }
+                    case 'paste': {
+                        if (!clipboard) return;
+                        const newBox = JSON.parse(JSON.stringify(clipboard));
+                        newBox.id = nextId++;
+                        newBox.x = contextMenuPos ? contextMenuPos.x : newBox.x + 20;
+                        newBox.y = contextMenuPos ? contextMenuPos.y : newBox.y + 20;
+                        boxes.push(newBox);
+                        selectedId = newBox.id;
+                        draw();
+                        showToast('已粘贴');
+                        break;
+                    }
+                    case 'delete': {
+                        if (contextMenuTarget === null) return;
+                        boxes = boxes.filter(b => b.id !== contextMenuTarget);
+                        if (selectedId === contextMenuTarget) selectedId = null;
+                        contextMenuTarget = null;
+                        draw();
+                        break;
+                    }
+                }
+            }
+
+            document.addEventListener('click', (e) => { if (!contextMenu.contains(e.target)) hideContextMenu(); });
+            document.addEventListener('contextmenu', (e) => { if (!canvas.contains(e.target)) hideContextMenu(); });
+
+            // ==================== 窗口调整 ====================
+            window.addEventListener('resize', () => { resizeCanvas(); draw(); });
+
+            // ==================== 初始化 ====================
+            resizeCanvas();
+            draw();
+        })();
+    </script>
+</body>
+
+</html>

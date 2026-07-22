@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/global.css">
+    <title>UForm 表单设计器 - Schema Editor</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --panel-bg: #fff;
+            --border: #d0d5dd;
+            --text: #1d2939;
+            --text-secondary: #667085;
+            --primary: #4f7cff;
+            --danger: #f04438;
+            --success: #12b76a;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            height: 56px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .header .logo { font-size: 18px; font-weight: 700; color: var(--primary); }
+        .header .subtitle { font-size: 12px; color: var(--text-secondary); }
+        .header .spacer { flex: 1; }
+        .header .btn {
+            padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;
+            border: 1px solid var(--border); background: #fff; color: var(--text);
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .header .btn:hover { border-color: var(--primary); color: var(--primary); }
+        .header .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .header .btn.success { background: var(--success); color: #fff; border-color: var(--success); }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .left-panel {
+            width: 220px; background: var(--panel-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; flex-shrink: 0;
+        }
+        .left-panel .panel-title {
+            padding: 14px 16px 10px; font-size: 14px; font-weight: 600;
+            color: var(--text); border-bottom: 1px solid var(--border);
+        }
+        .field-list { flex: 1; overflow-y: auto; padding: 8px; }
+        .field-list .section-title {
+            font-size: 11px; color: var(--text-secondary); padding: 8px 12px 4px;
+            font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .field-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+            border-radius: 8px; cursor: grab; margin-bottom: 4px;
+            transition: background 0.15s, box-shadow 0.15s; border: 1px solid transparent; user-select: none;
+        }
+        .field-item:hover { background: #f5f7fb; border-color: var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .field-item:active { cursor: grabbing; }
+        .field-item .field-icon {
+            width: 32px; height: 32px; border-radius: 6px; background: #eef2ff;
+            display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+        }
+        .field-item .field-name { font-size: 13px; color: var(--text); font-weight: 500; }
+        .center-panel { flex: 1; display: flex; flex-direction: column; background: #f5f6f8; min-width: 0; }
+        .center-panel .canvas-header {
+            padding: 10px 16px; font-size: 13px; color: var(--text-secondary);
+            background: #f5f6f8; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .canvas-wrap { flex: 1; overflow-y: auto; padding: 24px; display: flex; justify-content: center; }
+        .form-canvas {
+            width: 100%; max-width: 640px; min-height: 400px; background: #fff;
+            border-radius: 10px; border: 2px dashed var(--border); padding: 24px; transition: border-color 0.2s;
+        }
+        .form-canvas.drag-over { border-color: var(--primary); background: #f8faff; }
+        .form-canvas .canvas-placeholder { text-align: center; color: #c0c6d0; padding: 60px 0; font-size: 14px; }
+        .form-canvas .canvas-placeholder svg { display: block; margin: 0 auto 12px; opacity: 0.3; }
+        .form-field-card {
+            position: relative; border: 1px solid #e8ecf1; border-radius: 8px;
+            padding: 14px 16px; margin-bottom: 10px; background: #fff; transition: all 0.15s; cursor: pointer;
+        }
+        .form-field-card:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(79,124,255,0.1); }
+        .form-field-card.selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(79,124,255,0.2); }
+        .form-field-card.layout-card { background: #fafbfd; border-style: dashed; }
+        .form-field-card .card-header {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+        }
+        .form-field-card .card-label { font-size: 13px; font-weight: 500; color: var(--text); }
+        .form-field-card .card-label .required-star { color: var(--danger); margin-left: 2px; }
+        .form-field-card .card-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+        .form-field-card:hover .card-actions { opacity: 1; }
+        .form-field-card .card-actions button {
+            width: 24px; height: 24px; border: none; background: transparent; cursor: pointer;
+            border-radius: 4px; font-size: 12px; color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .form-field-card .card-actions button:hover { background: #f0f2f5; color: var(--danger); }
+        .form-field-card .card-preview { pointer-events: none; }
+        .form-field-card .card-preview input,
+        .form-field-card .card-preview textarea,
+        .form-field-card .card-preview select {
+            width: 100%; padding: 7px 10px; border: 1px solid #e0e4ea; border-radius: 6px;
+            font-size: 13px; outline: none; background: #fafbfc; color: #999; font-family: inherit;
+        }
+        .form-field-card .card-preview textarea { resize: vertical; min-height: 60px; }
+        .form-field-card .card-preview .switch-preview {
+            display: inline-block; width: 40px; height: 22px; background: #d0d5dd;
+            border-radius: 11px; position: relative;
+        }
+        .form-field-card .card-preview .switch-preview::after {
+            content: ''; position: absolute; width: 18px; height: 18px; background: #fff;
+            border-radius: 50%; top: 2px; left: 2px;
+        }
+        .form-field-card .card-preview .radio-group,
+        .form-field-card .card-preview .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; }
+        .form-field-card .card-preview .radio-group label,
+        .form-field-card .card-preview .checkbox-group label {
+            font-size: 13px; color: #999; display: flex; align-items: center; gap: 4px;
+        }
+        /* 布局容器拖放区 */
+        .layout-drop-zone {
+            min-height: 60px; border: 2px dashed #e0e4ea; border-radius: 6px; padding: 8px;
+            margin-top: 8px; transition: all 0.2s; position: relative;
+        }
+        .layout-drop-zone.drag-over { border-color: var(--primary); background: #f8faff; }
+        .layout-drop-zone .drop-hint {
+            text-align: center; color: #c0c6d0; font-size: 12px; padding: 16px 0;
+        }
+        .right-panel {
+            width: 380px; background: var(--panel-bg); border-left: 1px solid var(--border);
+            display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
+        }
+        .right-panel .tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .right-panel .tab {
+            flex: 1; padding: 10px; text-align: center; font-size: 13px; cursor: pointer;
+            color: var(--text-secondary); border-bottom: 2px solid transparent; transition: all 0.15s;
+            background: transparent; border: none;
+        }
+        .right-panel .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
+        .right-panel .tab-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        .right-panel .tab-content.hidden { display: none; }
+        .code-editor {
+            width: 100%; flex: 1; border: none; padding: 12px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px;
+            line-height: 1.6; resize: none; outline: none; background: #1e1e2e; color: #cdd6f4; tab-size: 2;
+        }
+        .props-editor { flex: 1; overflow-y: auto; padding: 12px 16px; }
+        .props-editor .prop-group { margin-bottom: 14px; }
+        .props-editor .prop-group label {
+            display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500;
+        }
+        .props-editor .prop-group input,
+        .props-editor .prop-group textarea,
+        .props-editor .prop-group select {
+            width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px;
+            font-size: 13px; outline: none; font-family: inherit;
+        }
+        .props-editor .prop-group input:focus,
+        .props-editor .prop-group textarea:focus,
+        .props-editor .prop-group select:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 2px rgba(79,124,255,0.15);
+        }
+        .props-editor .prop-group textarea {
+            resize: vertical; min-height: 60px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px;
+        }
+        .props-editor .prop-group .hint { font-size: 11px; color: #aaa; margin-top: 2px; }
+        .props-editor .prop-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
+        .props-editor .prop-row label { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text); }
+        .props-editor .empty-hint { text-align: center; color: #c0c6d0; padding: 40px 0; font-size: 13px; }
+        .props-editor .section-header {
+            font-size: 12px; font-weight: 600; color: var(--text); padding: 8px 0 4px;
+            border-top: 1px solid var(--border); margin-top: 10px;
+        }
+        .props-editor .prop-inline { display: flex; gap: 8px; }
+        .props-editor .prop-inline > div { flex: 1; }
+        #toast {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.78); color: #fff; padding: 8px 20px; border-radius: 6px;
+            font-size: 13px; z-index: 300; pointer-events: none; transition: opacity 0.3s; opacity: 0;
+        }
+        /* 预览模式 */
+        .preview-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3); z-index: 200;
+            display: none; align-items: flex-start; justify-content: center;
+            padding: 40px 20px; overflow-y: auto;
+        }
+        .preview-overlay.show { display: flex; }
+        .preview-modal {
+            background: #fff; border-radius: 10px; width: 100%; max-width: 640px;
+            padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); position: relative;
+            margin-bottom: 40px;
+        }
+        .preview-modal .preview-title {
+            font-size: 18px; font-weight: 600; margin-bottom: 20px; color: var(--text);
+        }
+        .preview-modal .preview-close {
+            position: absolute; top: 12px; right: 16px; background: none; border: none;
+            font-size: 20px; cursor: pointer; color: var(--text-secondary); line-height: 1;
+        }
+        .preview-modal .preview-close:hover { color: var(--danger); }
+        .preview-form .preview-field { margin-bottom: 16px; }
+        .preview-form .preview-field label {
+            display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px;
+        }
+        .preview-form .preview-field label .req { color: var(--danger); margin-left: 2px; }
+        .preview-form .preview-field .desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .preview-form .preview-field input,
+        .preview-form .preview-field textarea,
+        .preview-form .preview-field select {
+            width: 100%; padding: 7px 10px; border: 1px solid #d0d5dd; border-radius: 6px;
+            font-size: 13px; outline: none; font-family: inherit; background: #fff; color: var(--text);
+        }
+        .preview-form .preview-field input:focus,
+        .preview-form .preview-field textarea:focus,
+        .preview-form .preview-field select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(79,124,255,0.15); }
+        .preview-form .preview-field textarea { resize: vertical; min-height: 80px; }
+        .preview-form .preview-group {
+            border: 1px solid #e8ecf1; border-radius: 8px; padding: 16px; margin-bottom: 16px;
+            background: #fafbfd;
+        }
+        .preview-form .preview-group-title {
+            font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px;
+            padding-bottom: 8px; border-bottom: 1px solid #e8ecf1;
+        }
+        .preview-form .preview-radio,
+        .preview-form .preview-checkbox { display: flex; flex-wrap: wrap; gap: 12px; }
+        .preview-form .preview-radio label,
+        .preview-form .preview-checkbox label {
+            display: flex; align-items: center; gap: 4px; font-weight: 400;
+        }
+        .preview-form .preview-switch {
+            width: 44px; height: 22px; background: #d0d5dd; border-radius: 11px;
+            position: relative; cursor: pointer; transition: background 0.2s;
+        }
+        .preview-form .preview-switch.on { background: var(--primary); }
+        .preview-form .preview-switch::after {
+            content: ''; position: absolute; width: 18px; height: 18px; background: #fff;
+            border-radius: 50%; top: 2px; left: 2px; transition: left 0.2s;
+        }
+        .preview-form .preview-switch.on::after { left: 24px; }
+        .preview-form .preview-rating { font-size: 24px; cursor: pointer; }
+        .preview-form .preview-rating span { color: #ddd; transition: color 0.15s; }
+        .preview-form .preview-rating span.active { color: #faad14; }
+        .preview-form .preview-upload {
+            border: 1px dashed #d0d5dd; border-radius: 6px; padding: 16px; text-align: center;
+            color: var(--text-secondary); cursor: pointer; font-size: 13px; transition: border-color 0.15s;
+        }
+        .preview-form .preview-upload:hover { border-color: var(--primary); color: var(--primary); }
+        .preview-form .preview-submit {
+            padding: 8px 24px; background: var(--primary); color: #fff; border: none;
+            border-radius: 6px; font-size: 14px; cursor: pointer; margin-top: 8px;
+        }
+        .preview-form .preview-submit:hover { opacity: 0.9; }
+        .preview-result {
+            margin-top: 16px; padding: 12px; background: #f0f5ff; border: 1px solid #d6e4ff;
+            border-radius: 6px; font-family: monospace; font-size: 12px; white-space: pre-wrap;
+            word-break: break-all; display: none;
+        }
+        .preview-result.show { display: block; }
+        /* 导入弹窗 */
+        .import-modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3); z-index: 200; display: none;
+            align-items: center; justify-content: center;
+        }
+        .import-modal.show { display: flex; }
+        .import-modal .import-box {
+            background: #fff; border-radius: 10px; width: 560px; max-width: 90vw;
+            padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); position: relative;
+        }
+        .import-modal .import-box h3 { margin: 0 0 12px; font-size: 16px; color: var(--text); }
+        .import-modal .import-box .import-hint { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+        .import-modal .import-box textarea {
+            width: 100%; height: 200px; border: 1px solid var(--border); border-radius: 6px;
+            padding: 10px; font-family: monospace; font-size: 12px; resize: vertical; outline: none;
+        }
+        .import-modal .import-box textarea:focus { border-color: var(--primary); }
+        .import-modal .import-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+        .import-modal .file-btn {
+            display: inline-block; padding: 6px 14px; border: 1px solid var(--border);
+            border-radius: 6px; font-size: 13px; cursor: pointer; background: #fff; color: var(--text);
+        }
+        .import-modal .file-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .import-modal .file-btn input { display: none; }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <span class="logo">UForm</span>
+        <span class="subtitle">Schema Editor</span>
+        <span class="spacer"></span>
+        <button class="btn" onclick="openImportModal()">导入 JSON</button>
+        <button class="btn" onclick="clearForm()">清空</button>
+        <button class="btn" id="previewBtn" onclick="togglePreview()">预览模式</button>
+        <button class="btn success" onclick="exportFile('markup')">导出 Markup JSX</button>
+        <button class="btn success" onclick="exportFile('json-render')">导出 JSON Schema</button>
+        <button class="btn primary" onclick="exportFile('json')">导出 Schema JSON</button>
+    </div>
+
+    <div class="main">
+        <div class="left-panel">
+            <div class="panel-title">组件类型</div>
+            <div class="field-list" id="fieldList">
+                <div class="section-title">输入控件</div>
+                <div class="field-item" draggable="true" data-type="string"><div class="field-icon">Aa</div><div class="field-name">Input 单行文本</div></div>
+                <div class="field-item" draggable="true" data-type="textarea"><div class="field-icon">¶</div><div class="field-name">TextArea 多行文本</div></div>
+                <div class="field-item" draggable="true" data-type="password"><div class="field-icon">*</div><div class="field-name">Password 密码</div></div>
+                <div class="field-item" draggable="true" data-type="number"><div class="field-icon">#</div><div class="field-name">NumberPicker 数字</div></div>
+                <div class="field-item" draggable="true" data-type="boolean"><div class="field-icon">⇄</div><div class="field-name">Switch 开关</div></div>
+                <div class="field-item" draggable="true" data-type="date"><div class="field-icon">📅</div><div class="field-name">DatePicker 日期</div></div>
+                <div class="field-item" draggable="true" data-type="time"><div class="field-icon">⏰</div><div class="field-name">TimePicker 时间</div></div>
+                <div class="field-item" draggable="true" data-type="range"><div class="field-icon">⟷</div><div class="field-name">Range 滑块</div></div>
+                <div class="field-item" draggable="true" data-type="rating"><div class="field-icon">★</div><div class="field-name">Rating 评分</div></div>
+                <div class="section-title">选择控件</div>
+                <div class="field-item" draggable="true" data-type="select"><div class="field-icon">☰</div><div class="field-name">Select 下拉选择</div></div>
+                <div class="field-item" draggable="true" data-type="radio"><div class="field-icon">◉</div><div class="field-name">Radio 单选框</div></div>
+                <div class="field-item" draggable="true" data-type="checkbox"><div class="field-icon">☑</div><div class="field-name">Checkbox 多选框</div></div>
+                <div class="field-item" draggable="true" data-type="transfer"><div class="field-icon">⇆</div><div class="field-name">Transfer 穿梭框</div></div>
+                <div class="section-title">上传控件</div>
+                <div class="field-item" draggable="true" data-type="upload"><div class="field-icon">↑</div><div class="field-name">Upload 上传</div></div>
+                <div class="section-title">布局组件</div>
+                <div class="field-item" draggable="true" data-type="FormLayout"><div class="field-icon">▦</div><div class="field-name">FormLayout 布局</div></div>
+                <div class="field-item" draggable="true" data-type="FormCard"><div class="field-icon">▣</div><div class="field-name">FormCard 卡片</div></div>
+                <div class="field-item" draggable="true" data-type="FormBlock"><div class="field-icon">▤</div><div class="field-name">FormBlock 分组</div></div>
+                <div class="field-item" draggable="true" data-type="FormStep"><div class="field-icon">▸</div><div class="field-name">FormStep 分步</div></div>
+                <div class="field-item" draggable="true" data-type="FormItemGrid"><div class="field-icon">▦</div><div class="field-name">FormItemGrid 栅格</div></div>
+                <div class="field-item" draggable="true" data-type="FormTextBox"><div class="field-icon">T</div><div class="field-name">FormTextBox 文本</div></div>
+                <div class="field-item" draggable="true" data-type="FormButtonGroup"><div class="field-icon">.Btn</div><div class="field-name">FormButtonGroup 按钮组</div></div>
+            </div>
+        </div>
+
+        <div class="center-panel">
+            <div class="canvas-header">
+                <span>表单预览</span>
+                <span style="font-size:12px;color:#aaa;">拖拽左侧字段到此处，布局组件可拖入子字段</span>
+            </div>
+            <div class="canvas-wrap">
+                <div class="form-canvas" id="formCanvas"
+                    ondragover="handleCanvasDragOver(event)"
+                    ondragleave="handleCanvasDragLeave(event)"
+                    ondrop="handleCanvasDrop(event)"
+                    onclick="handleCanvasClick(event)">
+                    <div class="canvas-placeholder" id="canvasPlaceholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#c0c6d0" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <line x1="8" y1="8" x2="16" y2="8"/>
+                            <line x1="8" y1="12" x2="16" y2="12"/>
+                            <line x1="8" y1="16" x2="12" y2="16"/>
+                        </svg>
+                        将左侧字段拖拽到此处
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('props')">属性</button>
+                <button class="tab" onclick="switchTab('json')">JSON Schema</button>
+                <button class="tab" onclick="switchTab('markup')">Markup JSX</button>
+                <button class="tab" onclick="switchTab('json-render')">JSON 渲染</button>
+            </div>
+            <div class="tab-content" id="tabProps">
+                <div class="props-editor" id="propsEditor">
+                    <div class="empty-hint">点击画布中的字段编辑属性</div>
+                </div>
+            </div>
+            <div class="tab-content hidden" id="tabJson">
+                <textarea class="code-editor" id="jsonEditor" spellcheck="false"></textarea>
+            </div>
+            <div class="tab-content hidden" id="tabMarkup">
+                <textarea class="code-editor" id="markupOutput" readonly spellcheck="false"></textarea>
+            </div>
+            <div class="tab-content hidden" id="tabJsonRender">
+                <textarea class="code-editor" id="jsonRenderOutput" readonly spellcheck="false"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <!-- 预览模式 -->
+    <div class="preview-overlay" id="previewOverlay" onclick="if(event.target===this)closePreview()">
+        <div class="preview-modal">
+            <button class="preview-close" onclick="closePreview()">✕</button>
+            <div class="preview-title" id="previewTitle">表单预览</div>
+            <div class="preview-form" id="previewForm"></div>
+            <div class="preview-result" id="previewResult"></div>
+        </div>
+    </div>
+
+    <!-- 导入弹窗 -->
+    <div class="import-modal" id="importModal" onclick="if(event.target===this)closeImportModal()">
+        <div class="import-box">
+            <h3>导入 Schema JSON</h3>
+            <div class="import-hint">粘贴 UForm / react-schema-editor 格式的 JSON Schema，或选择 .json 文件导入</div>
+            <textarea id="importTextarea" placeholder='{\n  "type": "object",\n  "title": "表单标题",\n  "properties": {\n    "username": {\n      "title": "用户名",\n      "type": "string",\n      "x-component": "Input",\n      "x-component-props": { "placeholder": "请输入" }\n    }\n  }\n}'></textarea>
+            <div class="import-actions">
+                <label class="file-btn">
+                    选择文件
+                    <input type="file" accept=".json" onchange="importFromFile(event)">
+                </label>
+                <button class="btn" onclick="closeImportModal()">取消</button>
+                <button class="btn primary" onclick="importFromText()">导入</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./assets/uform/uform-designer.js"></script>
+    <script>
+        // 页面加载后初始化
+        init();
+    </script>
+</body>
+
+</html>
