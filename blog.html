@@ -18,7 +18,6 @@
             overflow-x: hidden;
         }
 
-        /* ===== 顶部栏 ===== */
         .top-bar {
             display: flex;
             align-items: center;
@@ -51,22 +50,20 @@
             color: rgba(255, 255, 255, 0.55);
         }
 
-        /* ===== 左右布局 ===== */
         .main {
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: calc(100vh - 80px);
-            padding: 40px 40px 40px 60px;
-            gap: 40px;
-            max-width: 1300px;
+            padding: 30px 40px 30px 60px;
+            gap: 50px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* ===== 左侧文字 ===== */
         .left {
             flex: 1;
-            max-width: 500px;
+            max-width: 600px;
         }
         .left .badge {
             display: inline-block;
@@ -78,44 +75,264 @@
             color: #F4D758;
             font-family: 'Fira Code', monospace;
             letter-spacing: 0.5px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         .left h1 {
             font-family: 'Caveat', cursive;
-            font-size: 64px;
+            font-size: 56px;
             font-weight: 700;
             color: #F4D758;
             line-height: 1.1;
-            margin-bottom: 8px;
+            margin-bottom: 2px;
         }
         .left .sub {
-            font-size: 20px;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 17px;
+            color: rgba(255, 255, 255, 0.65);
             letter-spacing: 2px;
-            margin-bottom: 12px;
             font-weight: 300;
-        }
-        .left .desc {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.5);
-            line-height: 1.8;
-            margin-bottom: 28px;
-        }
-        .left .count {
-            font-family: 'Fira Code', monospace;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.3);
-        }
-        .left .count span {
-            color: #F4D758;
+            margin-bottom: 20px;
         }
 
-        /* ===== 右侧 iPhone ===== */
+        /* ===== MacBook ===== */
+        .macbook {
+            width: 100%;
+            max-width: 500px;
+        }
+        .macbook-bezel {
+            background: #2a2a30;
+            border-radius: 14px 14px 0 0;
+            padding: 14px;
+            padding-top: 0;
+            position: relative;
+        }
+        .macbook-notch {
+            width: 130px;
+            height: 14px;
+            background: #2a2a30;
+            border-radius: 0 0 10px 10px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        .macbook-screen {
+            width: 100%;
+            background: #1a1e2e;
+            border-radius: 4px;
+            overflow: hidden;
+            min-height: 340px;
+            position: relative;
+        }
+        .macbook-screen .screen-content {
+            padding: 16px 18px 18px;
+            position: relative;
+            min-height: 340px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== 终端壁纸背景 ===== */
+        .screen-content .desktop-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(ellipse at 30% 40%, rgba(43, 127, 216, 0.25), transparent 60%),
+                radial-gradient(ellipse at 70% 60%, rgba(244, 215, 88, 0.04), transparent 50%),
+                #131725;
+            pointer-events: none;
+            border-radius: 4px;
+        }
+        .screen-content .desktop-bg .star {
+            position: absolute;
+            color: rgba(244, 215, 88, 0.15);
+            font-size: 8px;
+            animation: twinkle 3s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            100% { opacity: 0.7; }
+        }
+
+        /* ===== 终端标题栏 ===== */
+        .screen-content .term-bar {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+        .screen-content .term-bar .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .screen-content .term-bar .dot.r { background: #ff5f57; }
+        .screen-content .term-bar .dot.y { background: #ffbd2e; }
+        .screen-content .term-bar .dot.g { background: #28ca41; }
+        .screen-content .term-bar .label {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 11px;
+            font-family: 'Fira Code', monospace;
+            margin: 0 auto;
+        }
+
+        /* ===== 2x2 图标 ===== */
+        .screen-content .desktop-icons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            position: relative;
+            z-index: 1;
+            max-width: 240px;
+            margin: 0 auto 12px;
+            flex-shrink: 0;
+        }
+        .screen-content .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.9);
+            padding: 12px 6px 10px;
+            border-radius: 12px;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .screen-content .desktop-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+        .screen-content .desktop-icon .icon-img {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+        }
+        .screen-content .desktop-icon .icon-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 14px;
+        }
+        .screen-content .desktop-icon .icon-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            line-height: 1.2;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        /* ===== 可交互终端 ===== */
+        .screen-content .terminal-box {
+            position: relative;
+            z-index: 1;
+            margin-top: 8px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+        }
+        .screen-content .terminal-box .term-output {
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+            min-height: 18px;
+            margin-bottom: 4px;
+            line-height: 1.6;
+        }
+        .screen-content .terminal-box .term-output .err {
+            color: #ff5f57;
+        }
+        .screen-content .terminal-box .term-output .ok {
+            color: #28ca41;
+        }
+        .screen-content .terminal-box .term-output .gold {
+            color: #F4D758;
+        }
+        .screen-content .terminal-box .term-input-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+        }
+        .screen-content .terminal-box .term-input-row .prompt {
+            color: #28ca41;
+            flex-shrink: 0;
+        }
+        .screen-content .terminal-box .term-input-row .prompt .user {
+            color: #F4D758;
+        }
+        .screen-content .terminal-box .term-input-row input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+            padding: 2px 0;
+            min-width: 40px;
+            caret-color: #F4D758;
+        }
+        .screen-content .terminal-box .term-input-row input::placeholder {
+            color: rgba(255, 255, 255, 0.15);
+        }
+        .screen-content .terminal-box .term-input-row .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.3);
+            animation: blink 0.9s step-end infinite;
+            flex-shrink: 0;
+        }
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .macbook-hinge {
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(180deg, #8a8a8e 0%, #6e6e72 100%);
+            border-radius: 0 0 2px 2px;
+        }
+        .macbook-base {
+            width: 100%;
+            height: 14px;
+            background: linear-gradient(180deg, #c8c8cc 0%, #a8a8ac 30%, #b8b8bc 70%, #9a9a9e 100%);
+            border-radius: 0 0 10px 10px;
+        }
+        .macbook-shadow {
+            width: 90%;
+            height: 30px;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.2) 0%, transparent 70%);
+            margin: 4px auto 0;
+        }
+
+        /* ===== iPhone ===== */
         .right {
             flex-shrink: 0;
         }
         .iphone {
-            --scale: 0.65;
+            --scale: 0.6;
             width: calc(534px * var(--scale));
             height: calc(1102px * var(--scale));
             position: relative;
@@ -230,7 +447,6 @@
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
         }
 
-        /* ===== 底部 ===== */
         .footer {
             text-align: center;
             padding: 20px 20px 30px;
@@ -243,13 +459,27 @@
         }
 
         /* ===== 响应式 ===== */
-        @media (max-width: 1024px) {
+        @media (max-width: 1100px) {
             .main {
-                padding: 30px 30px 30px 40px;
+                padding: 30px 30px;
                 gap: 30px;
             }
+            .left h1 {
+                font-size: 44px;
+            }
             .iphone {
-                --scale: 0.55;
+                --scale: 0.5;
+            }
+            .macbook {
+                max-width: 420px;
+            }
+            .screen-content .desktop-icons {
+                max-width: 210px;
+            }
+            .screen-content .desktop-icon .icon-img {
+                width: 56px;
+                height: 56px;
+                font-size: 26px;
             }
         }
 
@@ -257,7 +487,7 @@
             .main {
                 flex-direction: column;
                 padding: 30px 20px;
-                gap: 20px;
+                gap: 24px;
                 min-height: auto;
             }
             .left {
@@ -265,22 +495,26 @@
                 text-align: center;
             }
             .left h1 {
-                font-size: 48px;
+                font-size: 40px;
             }
             .left .sub {
-                font-size: 17px;
+                font-size: 16px;
             }
-            .left .desc {
-                max-width: 500px;
-                margin-left: auto;
-                margin-right: auto;
+            .macbook {
+                max-width: 420px;
+                margin: 0 auto;
+            }
+            .right {
+                width: 100%;
+                display: flex;
+                justify-content: center;
             }
             .iphone {
-                --scale: 0.5;
+                --scale: 0.4;
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 500px) {
             .top-bar {
                 padding: 8px 14px;
                 flex-wrap: wrap;
@@ -297,16 +531,86 @@
                 font-size: 10px;
             }
             .left h1 {
-                font-size: 36px;
+                font-size: 32px;
             }
             .left .sub {
-                font-size: 15px;
+                font-size: 14px;
             }
-            .left .desc {
-                font-size: 13px;
+            .macbook {
+                max-width: 100%;
+            }
+            .macbook-bezel {
+                padding: 10px;
+                border-radius: 10px 10px 0 0;
+            }
+            .macbook-notch {
+                width: 80px;
+                height: 10px;
+            }
+            .macbook-screen {
+                min-height: 280px;
+            }
+            .macbook-screen .screen-content {
+                padding: 12px 12px 14px;
+                min-height: 280px;
+            }
+            .screen-content .term-bar {
+                padding-bottom: 8px;
+                margin-bottom: 10px;
+            }
+            .screen-content .term-bar .dot {
+                width: 8px;
+                height: 8px;
+            }
+            .screen-content .term-bar .label {
+                font-size: 9px;
+            }
+            .screen-content .desktop-icons {
+                max-width: 180px;
+                gap: 10px;
+            }
+            .screen-content .desktop-icon .icon-img {
+                width: 48px;
+                height: 48px;
+                font-size: 22px;
+                border-radius: 12px;
+            }
+            .screen-content .desktop-icon .icon-label {
+                font-size: 9px;
+            }
+            .screen-content .terminal-box .term-output {
+                font-size: 10px;
+            }
+            .screen-content .terminal-box .term-input-row {
+                font-size: 10px;
+            }
+            .screen-content .terminal-box .term-input-row input {
+                font-size: 10px;
+            }
+            .macbook-base {
+                height: 10px;
+                border-radius: 0 0 8px 8px;
+            }
+            .macbook-shadow {
+                height: 20px;
             }
             .iphone {
-                --scale: 0.38;
+                --scale: 0.32;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .screen-content .desktop-icons {
+                max-width: 150px;
+                gap: 8px;
+            }
+            .screen-content .desktop-icon .icon-img {
+                width: 42px;
+                height: 42px;
+                font-size: 18px;
+            }
+            .screen-content .desktop-icon .icon-label {
+                font-size: 8px;
             }
         }
     </style>
@@ -314,27 +618,85 @@
 </head>
 <body>
 
-    <!-- ===== 顶部栏 ===== -->
     <div class="top-bar">
         <div class="logo">H5.Examples <span>✦ zhitingOS</span></div>
         <div class="clock" id="clock">--:--</div>
     </div>
 
-    <!-- ===== 左右布局 ===== -->
     <div class="main">
 
-        <!-- 左侧文字 -->
         <div class="left">
             <div class="badge">✦ 前端示例集</div>
             <h1>做你自己</h1>
             <div class="sub">Be yourself, everyone else is already taken.</div>
-            <div class="desc">
-                包含文字溢出省略号、字体渐变、flex布局、刮刮卡、WebSQL、翻牌游戏、五子棋、拖拽上传、贪吃蛇、推箱子、拖拽换位、大富翁、飞机大战、连连看、猜位置、2048、观察物体等前端简单示例代码。
+
+            <!-- MacBook -->
+            <div class="macbook">
+                <div class="macbook-bezel">
+                    <div class="macbook-notch"></div>
+                    <div class="macbook-screen">
+                        <div class="screen-content">
+
+                            <!-- 壁纸 -->
+                            <div class="desktop-bg">
+                                <span class="star" style="top:6%;left:4%;animation-delay:0s;">✦</span>
+                                <span class="star" style="top:12%;right:6%;animation-delay:1.2s;">✦</span>
+                                <span class="star" style="bottom:18%;left:10%;animation-delay:2.4s;">✦</span>
+                                <span class="star" style="bottom:10%;right:4%;animation-delay:0.6s;">✦</span>
+                                <span class="star" style="top:5%;left:44%;animation-delay:1.8s;">✦</span>
+                            </div>
+
+                            <!-- 终端标题栏 -->
+                            <div class="term-bar">
+                                <span class="dot r"></span>
+                                <span class="dot y"></span>
+                                <span class="dot g"></span>
+                                <span class="label">esther@workspace ~ zsh</span>
+                            </div>
+
+                            <!-- 2x2 图标 -->
+                            <div class="desktop-icons">
+                                <a class="desktop-icon" href="https://www.xiaohongshu.com/user/profile/55c6c7695894460904f87b47" target="_blank">
+                                    <div class="icon-img">📕</div>
+                                    <span class="icon-label">小红书内容</span>
+                                </a>
+                                <a class="desktop-icon" href="#" target="_blank">
+                                    <div class="icon-img">🎨</div>
+                                    <span class="icon-label">Design Skill</span>
+                                </a>
+                                <a class="desktop-icon" href="#" target="_blank">
+                                    <div class="icon-img">🤖</div>
+                                    <span class="icon-label">AI 实践</span>
+                                </a>
+                                <a class="desktop-icon" href="#" target="_blank">
+                                    <div class="icon-img">🚀</div>
+                                    <span class="icon-label">品牌运营</span>
+                                </a>
+                            </div>
+
+                            <!-- 可交互终端 -->
+                            <div class="terminal-box">
+                                <div class="term-output" id="termOutput">
+                                    <span class="gold">$</span> 输入命令试试...
+                                </div>
+                                <div class="term-input-row">
+                                    <span class="prompt"><span class="user">guest</span>@workspace ~ %</span>
+                                    <input type="text" id="termInput" placeholder="输入命令..." autofocus>
+                                    <span class="cursor-blink"></span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="macbook-hinge"></div>
+                <div class="macbook-base"></div>
+                <div class="macbook-shadow"></div>
             </div>
-            <div class="count">共 <span id="totalCount">0</span> 个示例</div>
+
         </div>
 
-        <!-- 右侧 iPhone -->
+        <!-- iPhone -->
         <div class="right">
             <div class="iphone" id="iphone">
                 <img class="iphone_back" src="./assets/iphoneBack.jpeg" alt="">
@@ -357,7 +719,6 @@
 
     </div>
 
-    <!-- ===== 底部 ===== -->
     <div class="footer"><span>✦</span> H5.Examples · 由 ZhitingOS 驱动 <span>✦</span></div>
 
     <script>
@@ -371,6 +732,57 @@
         updateClock();
         setInterval(updateClock, 30000);
 
+        // ===== 终端交互 =====
+        const termInput = document.getElementById('termInput');
+        const termOutput = document.getElementById('termOutput');
+
+        // 随机"没有权限"的回复列表
+        const denyMessages = [
+            '权限不足：此操作需要管理员权限',
+            '❌ 你没有执行此命令的权限',
+            'Permission denied. (sudo 也不行)',
+            '⛔ 被拒绝：你的账户无权访问此资源',
+            '🚫 无法执行：请联系系统管理员',
+            '你没有权限。真的没有。',
+            '❌ 命令被拒绝 — 你的身份验证已过期',
+            '⚠️ 权限不足：需要 root 权限',
+            '💀 你已经死了。没有权限。',
+            'Permission denied — 而且永远不会给你权限'
+        ];
+
+        termInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = this.value.trim();
+                if (cmd === '') return;
+
+                // 显示输入的命令
+                const oldHtml = termOutput.innerHTML;
+                const newLine = document.createElement('div');
+                newLine.innerHTML = `<span class="gold">$</span> ${cmd}`;
+                termOutput.appendChild(newLine);
+
+                // 随机选一条"没有权限"回复
+                const msg = denyMessages[Math.floor(Math.random() * denyMessages.length)];
+                const reply = document.createElement('div');
+                reply.innerHTML = `<span class="err">❌ ${msg}</span>`;
+                termOutput.appendChild(reply);
+
+                // 滚动到最下面
+                termOutput.scrollTop = termOutput.scrollHeight;
+
+                // 清空输入框
+                this.value = '';
+
+                // 自动重新聚焦
+                setTimeout(() => { this.focus(); }, 50);
+            }
+        });
+
+        // 点击屏幕自动聚焦输入框
+        document.querySelector('.macbook-screen').addEventListener('click', function() {
+            termInput.focus();
+        });
+
         // ===== 加载 examples.txt =====
         const r = new XMLHttpRequest();
         r.open('get', './examples.txt');
@@ -378,8 +790,6 @@
             const navData = r.responseText
                 .split('\n')
                 .filter(a => a && !a.includes('index') && !a.includes('blog'));
-
-            document.getElementById('totalCount').textContent = navData.length;
 
             const track = document.getElementById('menuTrack');
             let grid = null;
@@ -461,7 +871,6 @@
                 track.classList.add('anim');
             });
 
-            // 触屏
             let touchStartX = 0,
                 touchStartTranslate = 0,
                 isTouching = false;
