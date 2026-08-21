@@ -1011,4 +1011,66 @@
         r.send();
     </script>
 </body>
+
+     <!-- ===== 底部导航 ===== -->
+<style>
+.pill-nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(26, 26, 46, 0.08);
+  border-radius: 999px;
+  padding: 5px;
+  box-shadow: 0 8px 32px rgba(26, 26, 46, 0.12);
+}
+.pill-nav button {
+  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4A4A5A;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+.pill-nav button:hover { color: #1A1A2E; }
+.pill-nav button.active {
+  background: #2B7FD8;
+  color: #fff;
+}
+.pill-nav .pill-num {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  opacity: 0.5;
+  margin-right: 5px;
+}
+</style>
+
+<nav class="pill-nav" id="pillNav">
+  <button onclick="clickNav(this,'https://yztcf.de5.net/loge.html')"><span class="pill-num">01</span>Agent项目</button>
+  <button onclick="clickNav(this,'https://yztcf.de5.net')"><span class="pill-num"></span>⚪</button>
+  <button onclick="clickNav(this,'https://eg.yztcf.de5.net')"><span class="pill-num">03</span>可视化设计</button>
+</nav>
+
+<script>
+function clickNav(el, url) {
+  document.querySelectorAll('.pill-nav button').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if (url === 'back') {
+    history.back();
+  } else {
+    location.href = url;
+  }
+}
+</script>
 </html>
