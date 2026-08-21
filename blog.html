@@ -948,7 +948,8 @@
 
             document.addEventListener('mouseup', () => {
                 allowMove = false;
-                const gridWidth = 343;
+               const gridWidth = document.querySelector('.iphone_app_grid').offsetWidth + 30;
+// 30 是 margin-right
                 const pageCount = track.children.length;
                 const maxLeft = -gridWidth * (pageCount - 1);
 
