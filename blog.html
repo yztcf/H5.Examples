@@ -119,18 +119,17 @@
             background: #1a1e2e;
             border-radius: 4px;
             overflow: hidden;
-            min-height: 340px;
+            min-height: 360px;
             position: relative;
         }
         .macbook-screen .screen-content {
             padding: 16px 18px 18px;
             position: relative;
-            min-height: 340px;
+            min-height: 360px;
             display: flex;
             flex-direction: column;
         }
 
-        /* ===== 终端壁纸背景 ===== */
         .screen-content .desktop-bg {
             position: absolute;
             inset: 0;
@@ -152,7 +151,6 @@
             100% { opacity: 0.7; }
         }
 
-        /* ===== 终端标题栏 ===== */
         .screen-content .term-bar {
             display: flex;
             align-items: center;
@@ -179,7 +177,6 @@
             margin: 0 auto;
         }
 
-        /* ===== 2x2 图标 ===== */
         .screen-content .desktop-icons {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -243,14 +240,20 @@
             padding-top: 10px;
             border-top: 1px solid rgba(255, 255, 255, 0.04);
             flex-shrink: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         .screen-content .terminal-box .term-output {
             font-family: 'Fira Code', monospace;
             font-size: 11px;
             color: rgba(255, 255, 255, 0.35);
-            min-height: 18px;
-            margin-bottom: 4px;
-            line-height: 1.6;
+            min-height: 40px;
+            margin-bottom: 6px;
+            line-height: 1.8;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 120px;
         }
         .screen-content .terminal-box .term-output .err {
             color: #ff5f57;
@@ -261,16 +264,27 @@
         .screen-content .terminal-box .term-output .gold {
             color: #F4D758;
         }
+        .screen-content .terminal-box .term-output .dim {
+            color: rgba(255, 255, 255, 0.2);
+        }
+        .screen-content .terminal-box .term-output .bold {
+            font-weight: 700;
+        }
+        .screen-content .terminal-box .term-output .line {
+            padding: 1px 0;
+        }
         .screen-content .terminal-box .term-input-row {
             display: flex;
             align-items: center;
             gap: 6px;
             font-family: 'Fira Code', monospace;
             font-size: 11px;
+            flex-shrink: 0;
         }
         .screen-content .terminal-box .term-input-row .prompt {
             color: #28ca41;
             flex-shrink: 0;
+            white-space: nowrap;
         }
         .screen-content .terminal-box .term-input-row .prompt .user {
             color: #F4D758;
@@ -288,7 +302,11 @@
             caret-color: #F4D758;
         }
         .screen-content .terminal-box .term-input-row input::placeholder {
-            color: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.12);
+        }
+        .screen-content .terminal-box .term-input-row input.password-mode {
+            -webkit-text-security: disc;
+            text-security: disc;
         }
         .screen-content .terminal-box .term-input-row .cursor-blink {
             display: inline-block;
@@ -300,12 +318,8 @@
         }
         @keyframes blink {
             0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0;
-            }
+            100% { opacity: 1; }
+            50% { opacity: 0; }
         }
 
         .macbook-hinge {
@@ -458,160 +472,55 @@
             color: #F4D758;
         }
 
-        /* ===== 响应式 ===== */
         @media (max-width: 1100px) {
-            .main {
-                padding: 30px 30px;
-                gap: 30px;
-            }
-            .left h1 {
-                font-size: 44px;
-            }
-            .iphone {
-                --scale: 0.5;
-            }
-            .macbook {
-                max-width: 420px;
-            }
-            .screen-content .desktop-icons {
-                max-width: 210px;
-            }
-            .screen-content .desktop-icon .icon-img {
-                width: 56px;
-                height: 56px;
-                font-size: 26px;
-            }
+            .main { padding: 30px 30px; gap: 30px; }
+            .left h1 { font-size: 44px; }
+            .iphone { --scale: 0.5; }
+            .macbook { max-width: 420px; }
+            .screen-content .desktop-icons { max-width: 210px; }
+            .screen-content .desktop-icon .icon-img { width: 56px; height: 56px; font-size: 26px; }
         }
 
         @media (max-width: 820px) {
-            .main {
-                flex-direction: column;
-                padding: 30px 20px;
-                gap: 24px;
-                min-height: auto;
-            }
-            .left {
-                max-width: 100%;
-                text-align: center;
-            }
-            .left h1 {
-                font-size: 40px;
-            }
-            .left .sub {
-                font-size: 16px;
-            }
-            .macbook {
-                max-width: 420px;
-                margin: 0 auto;
-            }
-            .right {
-                width: 100%;
-                display: flex;
-                justify-content: center;
-            }
-            .iphone {
-                --scale: 0.4;
-            }
+            .main { flex-direction: column; padding: 30px 20px; gap: 24px; min-height: auto; }
+            .left { max-width: 100%; text-align: center; }
+            .left h1 { font-size: 40px; }
+            .left .sub { font-size: 16px; }
+            .macbook { max-width: 420px; margin: 0 auto; }
+            .right { width: 100%; display: flex; justify-content: center; }
+            .iphone { --scale: 0.4; }
         }
 
         @media (max-width: 500px) {
-            .top-bar {
-                padding: 8px 14px;
-                flex-wrap: wrap;
-                gap: 4px;
-            }
-            .top-bar .logo {
-                font-size: 15px;
-            }
-            .top-bar .logo span {
-                font-size: 10px;
-                margin-left: 4px;
-            }
-            .top-bar .clock {
-                font-size: 10px;
-            }
-            .left h1 {
-                font-size: 32px;
-            }
-            .left .sub {
-                font-size: 14px;
-            }
-            .macbook {
-                max-width: 100%;
-            }
-            .macbook-bezel {
-                padding: 10px;
-                border-radius: 10px 10px 0 0;
-            }
-            .macbook-notch {
-                width: 80px;
-                height: 10px;
-            }
-            .macbook-screen {
-                min-height: 280px;
-            }
-            .macbook-screen .screen-content {
-                padding: 12px 12px 14px;
-                min-height: 280px;
-            }
-            .screen-content .term-bar {
-                padding-bottom: 8px;
-                margin-bottom: 10px;
-            }
-            .screen-content .term-bar .dot {
-                width: 8px;
-                height: 8px;
-            }
-            .screen-content .term-bar .label {
-                font-size: 9px;
-            }
-            .screen-content .desktop-icons {
-                max-width: 180px;
-                gap: 10px;
-            }
-            .screen-content .desktop-icon .icon-img {
-                width: 48px;
-                height: 48px;
-                font-size: 22px;
-                border-radius: 12px;
-            }
-            .screen-content .desktop-icon .icon-label {
-                font-size: 9px;
-            }
-            .screen-content .terminal-box .term-output {
-                font-size: 10px;
-            }
-            .screen-content .terminal-box .term-input-row {
-                font-size: 10px;
-            }
-            .screen-content .terminal-box .term-input-row input {
-                font-size: 10px;
-            }
-            .macbook-base {
-                height: 10px;
-                border-radius: 0 0 8px 8px;
-            }
-            .macbook-shadow {
-                height: 20px;
-            }
-            .iphone {
-                --scale: 0.32;
-            }
+            .top-bar { padding: 8px 14px; flex-wrap: wrap; gap: 4px; }
+            .top-bar .logo { font-size: 15px; }
+            .top-bar .logo span { font-size: 10px; margin-left: 4px; }
+            .top-bar .clock { font-size: 10px; }
+            .left h1 { font-size: 32px; }
+            .left .sub { font-size: 14px; }
+            .macbook { max-width: 100%; }
+            .macbook-bezel { padding: 10px; border-radius: 10px 10px 0 0; }
+            .macbook-notch { width: 80px; height: 10px; }
+            .macbook-screen { min-height: 300px; }
+            .macbook-screen .screen-content { padding: 12px 12px 14px; min-height: 300px; }
+            .screen-content .term-bar { padding-bottom: 8px; margin-bottom: 10px; }
+            .screen-content .term-bar .dot { width: 8px; height: 8px; }
+            .screen-content .term-bar .label { font-size: 9px; }
+            .screen-content .desktop-icons { max-width: 180px; gap: 10px; }
+            .screen-content .desktop-icon .icon-img { width: 48px; height: 48px; font-size: 22px; border-radius: 12px; }
+            .screen-content .desktop-icon .icon-label { font-size: 9px; }
+            .screen-content .terminal-box .term-output { font-size: 10px; max-height: 80px; }
+            .screen-content .terminal-box .term-input-row { font-size: 10px; }
+            .screen-content .terminal-box .term-input-row input { font-size: 10px; }
+            .macbook-base { height: 10px; border-radius: 0 0 8px 8px; }
+            .macbook-shadow { height: 20px; }
+            .iphone { --scale: 0.32; }
         }
 
         @media (max-width: 380px) {
-            .screen-content .desktop-icons {
-                max-width: 150px;
-                gap: 8px;
-            }
-            .screen-content .desktop-icon .icon-img {
-                width: 42px;
-                height: 42px;
-                font-size: 18px;
-            }
-            .screen-content .desktop-icon .icon-label {
-                font-size: 8px;
-            }
+            .screen-content .desktop-icons { max-width: 150px; gap: 8px; }
+            .screen-content .desktop-icon .icon-img { width: 42px; height: 42px; font-size: 18px; }
+            .screen-content .desktop-icon .icon-label { font-size: 8px; }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -630,14 +539,12 @@
             <h1>做你自己</h1>
             <div class="sub">Be yourself, everyone else is already taken.</div>
 
-            <!-- MacBook -->
             <div class="macbook">
                 <div class="macbook-bezel">
                     <div class="macbook-notch"></div>
                     <div class="macbook-screen">
                         <div class="screen-content">
 
-                            <!-- 壁纸 -->
                             <div class="desktop-bg">
                                 <span class="star" style="top:6%;left:4%;animation-delay:0s;">✦</span>
                                 <span class="star" style="top:12%;right:6%;animation-delay:1.2s;">✦</span>
@@ -646,7 +553,6 @@
                                 <span class="star" style="top:5%;left:44%;animation-delay:1.8s;">✦</span>
                             </div>
 
-                            <!-- 终端标题栏 -->
                             <div class="term-bar">
                                 <span class="dot r"></span>
                                 <span class="dot y"></span>
@@ -654,7 +560,6 @@
                                 <span class="label">esther@workspace ~ zsh</span>
                             </div>
 
-                            <!-- 2x2 图标 -->
                             <div class="desktop-icons">
                                 <a class="desktop-icon" href="https://www.xiaohongshu.com/user/profile/55c6c7695894460904f87b47" target="_blank">
                                     <div class="icon-img">📕</div>
@@ -674,10 +579,10 @@
                                 </a>
                             </div>
 
-                            <!-- 可交互终端 -->
+                            <!-- 终端 -->
                             <div class="terminal-box">
                                 <div class="term-output" id="termOutput">
-                                    <span class="gold">$</span> 输入命令试试...
+                                    <div class="line"><span class="dim">💻 输入命令，需要 root 权限</span></div>
                                 </div>
                                 <div class="term-input-row">
                                     <span class="prompt"><span class="user">guest</span>@workspace ~ %</span>
@@ -696,7 +601,6 @@
 
         </div>
 
-        <!-- iPhone -->
         <div class="right">
             <div class="iphone" id="iphone">
                 <img class="iphone_back" src="./assets/iphoneBack.jpeg" alt="">
@@ -732,53 +636,130 @@
         updateClock();
         setInterval(updateClock, 30000);
 
-        // ===== 终端交互 =====
+        // ===== 终端状态机 =====
         const termInput = document.getElementById('termInput');
         const termOutput = document.getElementById('termOutput');
 
-        // 随机"没有权限"的回复列表
-        const denyMessages = [
-            '权限不足：此操作需要管理员权限',
-            '❌ 你没有执行此命令的权限',
-            'Permission denied. (sudo 也不行)',
-            '⛔ 被拒绝：你的账户无权访问此资源',
-            '🚫 无法执行：请联系系统管理员',
-            '你没有权限。真的没有。',
-            '❌ 命令被拒绝 — 你的身份验证已过期',
-            '⚠️ 权限不足：需要 root 权限',
-            '💀 你已经死了。没有权限。',
-            'Permission denied — 而且永远不会给你权限'
+        // 状态: 'normal' 普通模式 | 'ask_root' 询问密码 | 'password' 输入密码
+        let state = 'normal';
+        let lastCommand = '';
+
+        // 随机"需要root"的回复
+        const needRootMessages = [
+            '⚠️ 此命令需要 root 权限',
+            '⛔ 权限不足：需要 root 才能执行',
+            '❌ 拒绝访问：请使用 root 账户',
+            '🔒 需要提升权限 (root)',
+            '💀 你以为是普通用户就能跑？需要 root！',
+            '🚫 别想了，用 root 吧',
+            '⚠️ 检测到非 root 用户，操作被拒绝'
         ];
+
+        // 随机"密码错误"的回复
+        const wrongPasswordMessages = [
+            '❌ 密码错误，请重试',
+            '⛔ 认证失败：密码不正确',
+            '🔒 密码错误 (你确定你记得？)',
+            '💀 错了，再想想',
+            '🚫 密码不正确，还有机会',
+            '⚠️ 认证失败，请重新输入',
+            '❌ 密码错误 (提示：不是这个)'
+        ];
+
+        function appendOutput(html, className = '') {
+            const div = document.createElement('div');
+            div.className = 'line';
+            div.innerHTML = html;
+            termOutput.appendChild(div);
+            termOutput.scrollTop = termOutput.scrollHeight;
+        }
+
+        function handleCommand(cmd) {
+            const lower = cmd.toLowerCase().trim();
+
+            if (state === 'normal') {
+                // 任何命令都提示需要 root
+                const msg = needRootMessages[Math.floor(Math.random() * needRootMessages.length)];
+                appendOutput(`<span class="gold">$</span> ${cmd}`);
+                appendOutput(`<span class="err">${msg}</span>`);
+                appendOutput(`<span class="dim">💡 输入 "root" 切换到 root 用户</span>`);
+
+                // 记录最后命令
+                lastCommand = cmd;
+                state = 'ask_root';
+
+            } else if (state === 'ask_root') {
+                if (lower === 'root' || lower === 'su' || lower === 'sudo su') {
+                    // 切换到 root，要求输入密码
+                    appendOutput(`<span class="gold">$</span> ${cmd}`);
+                    appendOutput(`<span class="ok">🔓 切换到 root 用户</span>`);
+                    appendOutput(`<span class="dim">请输入 root 密码：</span>`);
+                    state = 'password';
+                    // 切换输入框为密码模式
+                    termInput.classList.add('password-mode');
+                    termInput.placeholder = '输入密码...';
+                    termInput.value = '';
+                    // 更新提示符
+                    document.querySelector('.prompt').innerHTML = '<span class="user">root</span>@workspace ~ #';
+                } else {
+                    // 还是普通命令，继续提示需要 root
+                    const msg = needRootMessages[Math.floor(Math.random() * needRootMessages.length)];
+                    appendOutput(`<span class="gold">$</span> ${cmd}`);
+                    appendOutput(`<span class="err">${msg}</span>`);
+                    appendOutput(`<span class="dim">💡 输入 "root" 切换到 root 用户</span>`);
+                }
+
+            } else if (state === 'password') {
+                // 不管输入什么密码，都是错误
+                const msg = wrongPasswordMessages[Math.floor(Math.random() * wrongPasswordMessages.length)];
+                // 密码用星号显示
+                const hidden = '*'.repeat(cmd.length);
+                appendOutput(`<span class="dim">密码：${hidden}</span>`);
+                appendOutput(`<span class="err">${msg}</span>`);
+                appendOutput(`<span class="dim">💡 再试一次，或者输入 "exit" 回到 guest</span>`);
+
+                // 退出密码模式回到普通
+                state = 'normal';
+                termInput.classList.remove('password-mode');
+                termInput.placeholder = '输入命令...';
+                document.querySelector('.prompt').innerHTML = '<span class="user">guest</span>@workspace ~ %';
+
+                // 如果输入 exit 或 quit，回到普通模式
+                if (lower === 'exit' || lower === 'quit' || lower === 'q') {
+                    appendOutput(`<span class="dim">👋 回到 guest 用户</span>`);
+                }
+            }
+        }
 
         termInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 const cmd = this.value.trim();
                 if (cmd === '') return;
 
-                // 显示输入的命令
-                const oldHtml = termOutput.innerHTML;
-                const newLine = document.createElement('div');
-                newLine.innerHTML = `<span class="gold">$</span> ${cmd}`;
-                termOutput.appendChild(newLine);
+                // 特殊处理 exit 在任何状态
+                const lower = cmd.toLowerCase().trim();
+                if (state === 'password' && (lower === 'exit' || lower === 'quit' || lower === 'q')) {
+                    appendOutput(`<span class="dim">密码：${'*'.repeat(cmd.length)}</span>`);
+                    appendOutput(`<span class="dim">👋 退出 root 切换，回到 guest</span>`);
+                    state = 'normal';
+                    termInput.classList.remove('password-mode');
+                    termInput.placeholder = '输入命令...';
+                    document.querySelector('.prompt').innerHTML = '<span class="user">guest</span>@workspace ~ %';
+                    this.value = '';
+                    setTimeout(() => this.focus(), 50);
+                    return;
+                }
 
-                // 随机选一条"没有权限"回复
-                const msg = denyMessages[Math.floor(Math.random() * denyMessages.length)];
-                const reply = document.createElement('div');
-                reply.innerHTML = `<span class="err">❌ ${msg}</span>`;
-                termOutput.appendChild(reply);
-
-                // 滚动到最下面
-                termOutput.scrollTop = termOutput.scrollHeight;
+                // 处理命令
+                handleCommand(cmd);
 
                 // 清空输入框
                 this.value = '';
-
-                // 自动重新聚焦
-                setTimeout(() => { this.focus(); }, 50);
+                setTimeout(() => this.focus(), 50);
             }
         });
 
-        // 点击屏幕自动聚焦输入框
+        // 点击屏幕自动聚焦
         document.querySelector('.macbook-screen').addEventListener('click', function() {
             termInput.focus();
         });
@@ -833,7 +814,6 @@
             }
             if (grid) track.appendChild(grid);
 
-            // ===== 滑动翻页 =====
             const menu = document.querySelector('.iphone_menu');
             let translateX = 0,
                 lastTranslateX = 0,
