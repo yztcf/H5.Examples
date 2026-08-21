@@ -311,17 +311,23 @@
       const unfoldDom = document.createElement("div");
       unfoldDom.classList.add("fold");
       leftContainer.appendChild(unfoldDom);
-      unfoldDom.addEventListener("click", () => {
-        if (leftNavBar.classList.contains("hidden")) {
-          leftNavBar.classList.remove("hidden");
-          if (document.body.clientWidth >= 600)
-            container.classList.remove("full");
-        } else {
-          leftNavBar.classList.add("hidden");
-          if (document.body.clientWidth >= 600)
-            container.classList.add("full");
-        }
+      if(unfoldDom){
+        unfoldDom.addEventListener("click", () => {
+          if (leftNavBar.classList.contains("hidden")) {
+            leftNavBar.classList.remove("hidden");
+            if (document.body.clientWidth >= 600)
+              container.classList.remove("full");
+          } else {
+            leftNavBar.classList.add("hidden");
+            if (document.body.clientWidth >= 600)
+              container.classList.add("full");
+          }
+        });
+      }
+      codeReloadBtn.addEventListener("click", () => {
+        console.log(iframe.contentWindow.location.reload(true));
       });
+
 
       codeReloadBtn.addEventListener("click", () => {
         console.log(iframe.contentWindow.location.reload(true));
