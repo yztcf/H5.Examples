@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -17,7 +16,6 @@
             display: flex;
             flex-direction: column;
         }
-
         .iphone {
             top: 50%;
             transform: translateY(-50%);
@@ -28,7 +26,6 @@
             right: 12%;
             user-select: none;
         }
-
         .iphone_mask {
             position: absolute;
             width: 100%;
@@ -36,7 +33,6 @@
             z-index: 1;
             pointer-events: none;
         }
-
         .iphone_back {
             position: absolute;
             left: 10px;
@@ -45,9 +41,7 @@
             width: calc(100% - 20px);
             height: calc(100% - 20px);
             pointer-events: none;
-
         }
-
         .iphone_status {
             position: absolute;
             left: 55px;
@@ -61,11 +55,9 @@
             font-size: 18px;
             pointer-events: none;
         }
-
         .iphone_status_right {
             height: 12px;
         }
-
         .iphone_bottom {
             display: flex;
             justify-content: space-around;
@@ -82,18 +74,15 @@
             transform: translateX(-50%);
             padding: 0 5px;
         }
-
         .iphone_app_icon {
             width: 55px;
             height: 55px;
             position: relative;
         }
-
         .iphone_app_icon:active,
         .iphone_app_icon:hover {
             filter: brightness(60%)
         }
-
         .first-screen {
             display: flex;
             width: 100%;
@@ -101,13 +90,11 @@
             overflow: hidden;
             position: relative;
         }
-
         .first-screen video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
         .first-screen .first-screen-content {
             position: absolute;
             color: #fff;
@@ -116,19 +103,14 @@
             top: 50%;
             transform: translate(0%, -50%);
         }
-
-
-
         .first-screen .fsc-title {
             font-size: 40px;
             font-weight: bold;
         }
-
         .first-screen .fsc-subtitle {
             margin-top: 12px;
             font-size: 30px;
         }
-
         .iphone_menu {
             display: flex;
             position: absolute;
@@ -139,16 +121,13 @@
             box-sizing: border-box;
             overflow: hidden;
         }
-
         .iphone_menu_track {
             display: flex;
             pointer-events: none;
         }
-
         .iphone_menu_track.anim {
             transition: transform .5s ease-in-out;
         }
-
         .iphone_app_grid {
             display: grid;
             width: calc(534px * var(--scale) - 60px);
@@ -156,19 +135,16 @@
             margin-right: 30px;
             row-gap: 20px;
         }
-
         .iphone_app {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         .iphone_app .iphone_app_icon {
             border-radius: 15px;
             object-fit: cover;
             pointer-events: all
         }
-
         .iphone_app .iphone_app_text {
             text-align: center;
             font-size: 14px;
@@ -182,12 +158,10 @@
         }
     </style>
 </head>
-
 <body>
     <div class="home-container">
         <div class="first-screen">
             <!-- <video src="./assets/mxj.mp4" muted autoplay loop preload="metadata"></video> -->
-
             <div class="first-screen-content">
                 <div class="fsc-title">做你自己，因为别人都有人做了。</div>
                 <div class="fsc-subtitle">Be yourself, everyone else is already taken.</div>
@@ -200,20 +174,17 @@
                 <div class="iphone_time"></div>
                 <img class="iphone_status_right" src="./assets/iphoneStatusRight.png">
             </div>
-
             <div class="iphone_bottom">
                 <img class="iphone_app_icon" src="./assets/icon/message.png">
                 <img class="iphone_app_icon" src="./assets/icon/wechat.png">
                 <img class="iphone_app_icon" src="./assets/icon/qq.png">
                 <img class="iphone_app_icon" src="./assets/icon/alipay.png">
             </div>
-
             <div class="iphone_menu">
                 <div class="iphone_menu_track"></div>
             </div>
         </div>
     </div>
-
     <script type="module">
         // 更新时间
         function updateTime() {
@@ -227,7 +198,6 @@
         }
         updateTime()
         setInterval(updateTime, 30 * 1000);
-
         // 加载菜单
         let r = new XMLHttpRequest();
         r.open("get", "./examples.txt");
@@ -236,10 +206,11 @@
                 .split("\n")
                 .filter((a) => a && !a.includes("index") && !a.includes("blog"));
             let navList = [];
-
             for (const nav of navData) {
-                let navNum = nav.split(".").shift();
-                let navName = nav.match(/[\d]{1,}.(.*?).html/)[1];
+                // =========修复文件名解析 BUG=========
+                let navNumMatch = nav.match(/^(\d+)/);
+                let navNum = navNumMatch ? navNumMatch[1] : "";
+                let navName = nav.replace(/^\d+\./,"").replace(/\.html$/,"");
                 let navSrc = "./" + nav?.replace("\r", "");
                 navList.push({
                     navNum,
@@ -247,12 +218,9 @@
                     navSrc,
                 });
             }
-            navList.sort((a, b) => b.navNum - a.navNum);
 
             let iphoneMenuDom = document.querySelector('.iphone_menu')
             let iphoneMenuTrackDom = document.querySelector('.iphone_menu_track')
-
-
             let iphoneAppGridDom = null;
             for (let i = 0; i < navList.length; i++) {
                 const navItem = navList[i];
@@ -263,19 +231,16 @@
                 const iphoneAppDom = document.createElement("div");
                 const iphoneAppImgDom = document.createElement('img')
                 const iphoneAppTextDom = document.createElement('div')
-
                 iphoneAppDom.classList.add('iphone_app')
                 iphoneAppImgDom.classList.add('iphone_app_icon')
                 iphoneAppTextDom.classList.add('iphone_app_text')
                 iphoneAppDom.appendChild(iphoneAppImgDom)
                 iphoneAppDom.appendChild(iphoneAppTextDom)
-
                 iphoneAppImgDom.setAttribute("src", `./assets/preview/${navItem.navNum}.png`);
                 iphoneAppTextDom.textContent = navItem.navName;
                 iphoneAppImgDom.addEventListener("click", function () {
                     open(location.href.replace('/blog.html', '') + navItem.navSrc.slice(1))
                 });
-
                 iphoneAppGridDom.appendChild(iphoneAppDom)
                 // 每到20个一页
                 if (iphoneAppGridDom.children.length === 20) {
@@ -283,45 +248,48 @@
                     iphoneAppGridDom = null;
                 }
             }
+            // =========修复：把不满20的最后一页追加进去，防止图标丢失=========
+            if(iphoneAppGridDom != null){
+                iphoneMenuTrackDom.appendChild(iphoneAppGridDom)
+            }
+
             let translateX = 0;
             let lastTranslateX = 0
             let sx = 0;
             let allowMove = false;
-
             iphoneMenuDom.addEventListener('mousedown', (e) => {
                 allowMove = true;
                 sx = e.x;
                 iphoneMenuTrackDom.classList.remove('anim')
             })
-            // document.addEventListener('mousedown', (e) => {
-            //     console.log(e);
-            //     if (e.target === iphoneMenuDom) {
-            //         allowMove = true;
-            //         sx = e.x;
-            //     }
-            //     iphoneMenuTrackDom.classList.remove('anim')
-            // })
             document.addEventListener("mousemove", (e) => {
                 if (allowMove) {
                     translateX = e.x - sx + lastTranslateX
                     iphoneMenuTrackDom.setAttribute(`style`, `transform:translateX(${translateX}px);`)
                 }
             })
-
             document.addEventListener("mouseup", (e) => {
                 allowMove = false;
                 let gridWidth = 343;
-                if (translateX > gridWidth / 2 * -1) translateX = 0
-                else translateX = Math.round(translateX / gridWidth) * gridWidth
+                // 自动读取真实页数，限制滑动边界，不会滑出空白第三页
+                let realPageCount = iphoneMenuTrackDom.children.length;
+                const maxLeft = -gridWidth * (realPageCount - 1);
+
+                if (translateX > gridWidth / 2 * -1) {
+                    translateX = 0
+                } else {
+                    translateX = Math.round(translateX / gridWidth) * gridWidth
+                }
+                if(translateX < maxLeft){
+                    translateX = maxLeft;
+                }
+
                 lastTranslateX = translateX
                 iphoneMenuTrackDom.setAttribute(`style`, `transform:translateX(${translateX}px);`)
                 iphoneMenuTrackDom.classList.add('anim')
             })
-
         };
         r.send();
-
     </script>
 </body>
-
 </html>
