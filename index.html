@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./assets/global.css">
-    <title>作品集</title>
+    <title>H5.Examples - 作品集</title>
     <style>
         .home-container {
             background-color: #000;
@@ -124,6 +124,7 @@
         .iphone_menu_track {
             display: flex;
             pointer-events: none;
+            will-change: transform;
         }
         .iphone_menu_track.anim {
             transition: transform .5s ease-in-out;
@@ -183,8 +184,8 @@
 
 <script type="module">
     // 更新时间
+    const timeDom = document.querySelector("#timeText");
     function updateTime(){
-        const timeDom = document.querySelector("#timeText");
         const d = new Date();
         let h = d.getHours().toString().padStart(2,'0');
         let m = d.getMinutes().toString().padStart(2,'0');
@@ -214,7 +215,10 @@
             })
         }
 
+        // 全部内存构建，最后一次性渲染到页面，减少重绘
+        const fragment = document.createDocumentFragment();
         let gridDom = createGrid();
+
         for(let i=0;i<list.length;i++){
             const item = list[i];
             const appDom = document.createElement("div");
@@ -223,11 +227,6 @@
             const imgDom = document.createElement("img");
             imgDom.className = "iphone_app_icon";
 
-            // 加载失败清空src，显示css白色背景，保持方块大小不变
-            imgDom.onerror = function(){
-                this.src = "";
-            };
-
             const textDom = document.createElement("div");
             textDom.className = "app-text";
             textDom.innerText = item.name;
@@ -235,22 +234,26 @@
             appDom.appendChild(imgDom);
             appDom.appendChild(textDom);
 
-            imgDom.setAttribute("src",`./assets/preview/${item.num}.png`);
+            // 关键：只尝试加载图片，404就保持白色背景，不反复请求
+            imgDom.onerror = function(){
+                this.style.display = "none";
+            }
+            imgDom.src = `./assets/preview/${item.num}.png`;
 
-            appDom.addEventListener("click",()=>{
-                window.open("./"+item.html);
-            })
+            // 点击跳转
+            appDom.onclick = ()=> window.open("./"+item.html);
 
             gridDom.appendChild(appDom);
 
             if((i+1) % 20 === 0){
-                menuTrack.appendChild(gridDom);
+                fragment.appendChild(gridDom);
                 gridDom = createGrid();
             }
         }
-        menuTrack.appendChild(gridDom);
+        fragment.appendChild(gridDom);
+        menuTrack.appendChild(fragment);
 
-        // 原版拖拽滑动，不做任何额外优化，恢复原来流畅度
+        // =====拖拽逻辑优化，缓存变量，减少dom查询=====
         let translateX = 0;
         let lastX = 0;
         let isDrag = false;
